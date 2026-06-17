@@ -1,0 +1,5 @@
+[mysqld]
+port=3307
+bind-address=127.0.0.1
+skip-grant-tables
+datadir=C:/Project/Web-tool/Revanex-Forms/mysql_data

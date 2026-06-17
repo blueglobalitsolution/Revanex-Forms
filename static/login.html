@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Revanex Forms</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/auth.js"></script>
+    <style>
+        .login-page {
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-3);
+            background: linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-bg) 100%);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 440px;
+            padding: var(--space-4);
+            border-radius: var(--radius-card);
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: var(--space-3);
+        }
+
+        .login-header .logo {
+            display: inline-flex;
+            width: 54px;
+            height: 54px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 18px;
+            background: var(--color-primary);
+            color: var(--color-bg);
+            box-shadow: var(--shadow-warm);
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: var(--space-2);
+        }
+
+        .login-header h2 {
+            font-size: 25px;
+            color: var(--color-text);
+            margin-bottom: var(--space-1);
+        }
+
+        .login-header p {
+            color: var(--color-text-secondary);
+            font-size: 14px;
+        }
+
+        .auth-btn {
+            width: 100%;
+            margin-top: var(--space-2);
+        }
+
+        .alert-container {
+            margin-bottom: var(--space-2);
+        }
+
+        .alert {
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-page">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo">R</div>
+                <h2 id="auth-title">Revanex Forms</h2>
+                <p id="auth-subtitle">Login to manage your forms & submissions</p>
+            </div>
+
+            <div class="alert-container">
+                <div class="alert alert-error" id="error-alert">
+                    <span id="error-msg">Invalid username or password.</span>
+                </div>
+                <div class="alert alert-success" id="success-alert">
+                    <span id="success-msg">Reset password instructions have been sent.</span>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" onsubmit="handleLoginSubmit(event)">
+                <div class="form-group">
+                    <label class="form-label" for="username">Username <span class="required">*</span></label>
+                    <input type="text" id="username" class="form-input" placeholder="Enter username" required minlength="3" autocomplete="username">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label class="form-label" for="password">Password <span class="required">*</span></label>
+                    <input type="password" id="password" class="form-input" placeholder="Enter password" required minlength="6" autocomplete="current-password">
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; margin-bottom: var(--space-2);">
+                    <a href="#" onclick="toggleMode('forgot')" style="font-size: 14px; font-weight: 500; color: var(--color-primary);">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary auth-btn" id="login-btn">
+                    Login
+                </button>
+            </form>
+
+            <!-- Forgot Password Form -->
+            <form id="forgot-form" onsubmit="handleForgotSubmit(event)" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label" for="forgot-username">Username <span class="required">*</span></label>
+                    <input type="text" id="forgot-username" class="form-input" placeholder="Enter username" required minlength="3">
+                    <span class="form-hint">A temporary login password will be generated and sent to the administrator's email.</span>
+                </div>
+
+                <button type="submit" class="btn btn-primary auth-btn" id="forgot-btn" style="margin-bottom: var(--space-2);">
+                    Request Temporary Password
+                </button>
+                
+                <button type="button" class="btn btn-secondary auth-btn" onclick="toggleMode('login')">
+                    Back to Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'login';
+
+        function toggleMode(mode) {
+            currentMode = mode;
+            document.getElementById('error-alert').style.display = 'none';
+            document.getElementById('success-alert').style.display = 'none';
+
+            const authTitle = document.getElementById('auth-title');
+            const subtitle = document.getElementById('auth-subtitle');
+            const loginForm = document.getElementById('login-form');
+            const forgotForm = document.getElementById('forgot-form');
+
+            if (mode === 'login') {
+                authTitle.textContent = 'Revanex Forms';
+                subtitle.textContent = 'Login to manage your forms & submissions';
+                loginForm.style.display = 'block';
+                forgotForm.style.display = 'none';
+            } else {
+                authTitle.textContent = 'Reset Password';
+                subtitle.textContent = 'Enter your username to request a reset';
+                loginForm.style.display = 'none';
+                forgotForm.style.display = 'block';
+            }
+        }
+
+        async function handleLoginSubmit(e) {
+            e.preventDefault();
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const errorAlert = document.getElementById('error-alert');
+            const errorMsg = document.getElementById('error-msg');
+            const submitBtn = document.getElementById('login-btn');
+
+            errorAlert.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Logging in...';
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: usernameInput.value.trim(),
+                        password: passwordInput.value
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Authentication failed');
+
+                window.location.href = '/dashboard.html';
+            } catch (err) {
+                errorMsg.textContent = err.message;
+                errorAlert.style.display = 'flex';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Login';
+            }
+        }
+
+        async function handleForgotSubmit(e) {
+            e.preventDefault();
+            const usernameInput = document.getElementById('forgot-username');
+            const errorAlert = document.getElementById('error-alert');
+            const errorMsg = document.getElementById('error-msg');
+            const successAlert = document.getElementById('success-alert');
+            const successMsg = document.getElementById('success-msg');
+            const submitBtn = document.getElementById('forgot-btn');
+
+            errorAlert.style.display = 'none';
+            successAlert.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Requesting...';
+
+            try {
+                const res = await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: usernameInput.value.trim()
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Request failed');
+
+                successMsg.textContent = data.message;
+                successAlert.style.display = 'flex';
+                usernameInput.value = '';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Request Temporary Password';
+            } catch (err) {
+                errorMsg.textContent = err.message;
+                errorAlert.style.display = 'flex';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Request Temporary Password';
+            }
+        }
+    </script>
+</body>
+</html>

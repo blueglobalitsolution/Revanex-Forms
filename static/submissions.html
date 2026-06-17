@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submissions - Revanex Forms</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/auth.js"></script>
+</head>
+<body>
+    <div class="app-layout">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h1><span class="logo-icon">&#9998;</span> Revanex Forms</h1>
+            </div>
+            <div class="sidebar-nav">
+                <a href="/dashboard.html"><span class="nav-icon">&#9632;</span> Dashboard</a>
+                <a href="/create-form.html"><span class="nav-icon">+</span> Create Form</a>
+                <a href="/settings.html"><span class="nav-icon">&#9881;</span> Settings</a>
+            </div>
+            <div class="sidebar-footer" style="padding: 16px; border-top: 1px solid #f1efe4; margin-top: auto;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-weight: 500; font-size: 14px; color: var(--color-text);">
+                    <span style="font-size: 18px;">&#128100;</span> <span id="sidebar-username">Loading...</span>
+                </div>
+                <a href="#" id="logout-btn" class="btn btn-secondary btn-sm" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span>&#8594;</span> Logout
+                </a>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h2 id="form-title">Submissions</h2>
+                    <p id="submission-count" style="font-size:14px">Loading...</p>
+                </div>
+                <div style="display:flex;gap:8px">
+                    <button class="btn btn-secondary" onclick="exportCSV()">&#8595; Export CSV</button>
+                    <a href="/dashboard.html" class="btn btn-secondary">Back to Dashboard</a>
+                </div>
+            </div>
+
+            <div id="alert-container"></div>
+
+            <div id="loading-state" class="empty-state">
+                <div class="spinner spinner-lg" style="margin:0 auto 16px"></div>
+                <p>Loading submissions...</p>
+            </div>
+
+            <div id="empty-state" class="empty-state" style="display:none">
+                <div class="icon">&#128203;</div>
+                <h3>No submissions yet</h3>
+                <p>Share your form to start collecting responses</p>
+                <button class="btn btn-primary" onclick="window.location.href='/dashboard.html'">Back to Dashboard</button>
+            </div>
+
+            <div id="submissions-container" style="display:none">
+                <div class="card">
+                    <div class="card-body" style="padding:0">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr id="table-header">
+                                        <th>#</th>
+                                        <th>Submitted</th>
+                                        <th>Payment</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="submissions-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Submission Detail Modal -->
+    <div class="modal-overlay" id="detail-modal">
+        <div class="modal" style="max-width:640px">
+            <div class="modal-header">
+                <h3>Submission Details</h3>
+                <button class="modal-close" onclick="closeDetailModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="detail-body"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeDetailModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/js/submissions.js"></script>
+</body>
+</html>

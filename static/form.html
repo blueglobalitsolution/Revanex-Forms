@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form - Revanex Forms</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+    <div class="public-form-page">
+        <div id="form-container" class="public-form-container">
+            <div class="public-form-header">
+                <h1 id="form-title">Loading...</h1>
+                <p id="form-description"></p>
+            </div>
+            <div class="public-form-body">
+                <div id="form-loading" class="empty-state">
+                    <div class="spinner spinner-lg" style="margin:0 auto 16px"></div>
+                    <p>Loading form...</p>
+                </div>
+                <div id="form-content" style="display:none">
+                    <form id="main-form" novalidate>
+                        <div id="form-fields"></div>
+                        <div id="payment-section" style="display:none">
+                            <div class="alert alert-info">
+                                <span>&#8505;</span>
+                                <span>You will be redirected to complete payment after submitting.</span>
+                            </div>
+                            <div id="payment-summary" class="payment-summary">
+                                <strong>Amount to pay: &#8377;<span id="payment-amount-display">0</span></strong>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg" id="submit-btn" style="width:100%;margin-top:8px">
+                            Submit
+                        </button>
+                    </form>
+                </div>
+                <div id="form-success" style="display:none">
+                    <div class="success-page">
+                        <div class="check-icon">&#10003;</div>
+                        <h2>Submission Received!</h2>
+                        <p>Thank you for your response. We'll be in touch if needed.</p>
+                    </div>
+                </div>
+                <div id="form-error" style="display:none">
+                    <div class="alert alert-error" style="margin-top:20px">
+                        <span>&#9888;</span>
+                        <span id="error-message">Something went wrong. Please try again.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="public-form-footer">
+                Powered by Revanex Forms
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/public-form.js"></script>
+</body>
+</html>
