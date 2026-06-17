@@ -39,7 +39,7 @@
     --gray-900: var(--color-text);
     
     /* Claymorphism & Minimalist Design Variables */
-    --radius-card: 32px;
+    --radius-surface: 32px;
     --radius-btn: 24px;
     --radius-input: 16px;
     --radius-badge: 14px;
@@ -51,17 +51,17 @@
         
     --clay-btn-shadow:
         0px 8px 16px rgba(134, 77, 38, 0.08),
-        inset 3px 3px 6px rgba(255, 255, 255, 0.9),
+        inset 3px 3px 6px rgba(255, 255, 255, 0.4),
         inset -3px -3px 6px rgba(134, 77, 38, 0.06);
 
     --clay-btn-shadow-hover:
         0px 12px 20px rgba(134, 77, 38, 0.12),
-        inset 4px 4px 8px rgba(255, 255, 255, 0.95),
+        inset 4px 4px 8px rgba(255, 255, 255, 0.5),
         inset -4px -4px 8px rgba(134, 77, 38, 0.1);
 
     --clay-btn-shadow-active:
         inset 3px 3px 6px rgba(134, 77, 38, 0.15),
-        inset -3px -3px 6px rgba(255, 255, 255, 0.8);
+        inset -3px -3px 6px rgba(255, 255, 255, 0.3);
 
     --clay-input-shadow:
         inset 3px 3px 6px rgba(134, 77, 38, 0.04),
@@ -73,8 +73,8 @@
         0 0 0 3px rgba(134, 77, 38, 0.08);
         
     --radius: var(--radius-input);
-    --radius-lg: var(--radius-card);
-    --radius-card: var(--radius-card);
+    --radius-lg: var(--radius-surface);
+    --radius-card: var(--radius-surface);
     --shadow: var(--clay-card-shadow);
     --shadow-warm: var(--clay-btn-shadow);
     --shadow-lg: var(--clay-card-shadow);
@@ -100,6 +100,12 @@ html {
     scroll-behavior: smooth;
 }
 
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
 body {
     min-height: 100vh;
     background: var(--color-bg);
@@ -123,6 +129,14 @@ input,
 select,
 textarea {
     font: inherit;
+    max-width: 100%;
+}
+
+img,
+svg,
+video,
+canvas {
+    max-width: 100%;
 }
 
 h1,
@@ -203,6 +217,7 @@ h4 {
     font-size: 16px;
     font-weight: 500;
     transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    white-space: nowrap;
 }
 
 .sidebar-nav a:hover {
@@ -242,6 +257,17 @@ h4 {
     margin-bottom: var(--space-4);
 }
 
+.page-header > div {
+    min-width: 0;
+}
+
+.page-header > div:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    justify-content: flex-end;
+}
+
 .page-header h2 {
     font-size: clamp(36px, 4vw, 45px);
     line-height: 1;
@@ -270,6 +296,8 @@ h4 {
     font-weight: 600;
     line-height: 20.8px;
     transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    text-align: center;
+    white-space: nowrap;
 }
 
 .btn:hover {
@@ -358,6 +386,7 @@ h4 {
 .field-palette,
 .builder-canvas,
 .field-editor {
+    width: 100%;
     background: var(--color-bg);
     border: 1px solid rgba(134, 77, 38, 0.05);
     border-radius: var(--radius-card);
@@ -569,6 +598,8 @@ h4 {
 .table-container {
     overflow-x: auto;
     border-radius: var(--radius-input);
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Custom styled claymorphic scrollbar */
@@ -590,6 +621,7 @@ h4 {
 
 table {
     width: 100%;
+    min-width: 720px;
     border-collapse: separate;
     border-spacing: 0;
 }
@@ -757,6 +789,10 @@ table .actions {
     font-weight: 600;
 }
 
+.form-card-info {
+    min-width: 0;
+}
+
 .form-card-info p {
     color: var(--color-text-secondary);
     font-size: 16px;
@@ -903,6 +939,7 @@ table .actions {
 
 .field-content {
     flex: 1;
+    min-width: 0;
 }
 
 .field-header,
@@ -1103,37 +1140,179 @@ table .actions {
 }
 
 @media (max-width: 1024px) {
+    .app-layout {
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .sidebar {
+        position: sticky;
+        inset: 0 0 auto 0;
+        width: 100%;
+        min-height: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        border-right: 0;
+        border-bottom: 1px solid rgba(134, 77, 38, 0.05);
+        box-shadow:
+            0px 10px 30px rgba(134, 77, 38, 0.04),
+            inset 0px -3px 6px rgba(134, 77, 38, 0.02);
+    }
+
+    .sidebar-header {
+        flex: 0 0 auto;
+        padding: var(--space-2) var(--space-3);
+        border-bottom: 0;
+    }
+
+    .sidebar-header h1 {
+        white-space: nowrap;
+    }
+
+    .sidebar-nav {
+        flex: 1 1 360px;
+        flex-direction: row;
+        gap: var(--space-1);
+        min-width: 0;
+        overflow-x: auto;
+        padding: var(--space-2);
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .sidebar-nav a {
+        flex: 0 0 auto;
+    }
+
+    .sidebar-nav a:hover {
+        transform: translateY(-1px);
+    }
+
+    .sidebar-footer {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        gap: var(--space-1);
+        margin-top: 0 !important;
+        padding: var(--space-2) var(--space-3) !important;
+        border-top: 0 !important;
+        border-left: 1px solid #f1efe4;
+    }
+
+    .sidebar-footer > div {
+        max-width: 160px;
+        margin-bottom: 0 !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .sidebar-footer #logout-btn {
+        width: auto !important;
+        min-width: 104px;
+    }
+
     .main-content {
+        width: 100%;
+        max-width: 1024px;
+        margin: 0 auto;
         padding: var(--space-4);
     }
 
     .builder-layout {
-        grid-template-columns: 240px 1fr;
+        grid-template-columns: 1fr;
+    }
+
+    .field-palette {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: var(--space-1);
+    }
+
+    .field-palette h4 {
+        grid-column: 1 / -1;
+        margin-bottom: var(--space-1);
+    }
+
+    .field-type-btn {
+        margin-bottom: 0;
+    }
+
+    .grid-2,
+    .grid-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .form-card {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .form-card-info {
+        flex: 1 1 320px;
+    }
+
+    .form-card-meta {
+        flex: 0 0 auto;
+    }
+
+    .form-card-actions {
+        flex: 1 1 100%;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 900px) {
+    .page-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .page-header > div:last-child {
+        justify-content: flex-start;
+    }
+
+    .card-header {
+        align-items: flex-start;
+        flex-direction: column;
     }
 }
 
 @media (max-width: 768px) {
-    .app-layout {
-        flex-direction: column;
-    }
-
     .sidebar {
         position: relative;
         width: 100%;
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .sidebar-header {
         padding: var(--space-3);
     }
 
+    .sidebar-header h1 {
+        font-size: 20px;
+    }
+
     .sidebar-nav {
+        flex: 0 0 auto;
         flex-direction: row;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         padding: var(--space-2) var(--space-3);
     }
 
+    .sidebar-footer {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        padding: var(--space-2) var(--space-3) !important;
+        border-left: 0;
+        border-top: 1px solid #f1efe4 !important;
+    }
+
     .main-content {
-        margin-left: 0;
+        max-width: 100%;
         padding: var(--space-3);
     }
 
@@ -1147,12 +1326,6 @@ table .actions {
     .page-header h2 {
         font-size: 36px;
         line-height: 1.05;
-    }
-
-    .grid-2,
-    .grid-3,
-    .builder-layout {
-        grid-template-columns: 1fr;
     }
 
     .form-card-meta {
@@ -1191,8 +1364,15 @@ table .actions {
         font-size: 15px;
     }
 
+    :root {
+        --space-3: 20px;
+        --space-4: 24px;
+        --space-5: 32px;
+        --radius-surface: 24px;
+    }
+
     .page-header h2 {
-        font-size: 34px;
+        font-size: clamp(30px, 9vw, 34px);
     }
 
     .public-form-header h1,
@@ -1207,10 +1387,105 @@ table .actions {
         flex-direction: column;
     }
 
+    .sidebar-nav a {
+        padding: 10px 14px;
+    }
+
+    .sidebar-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .sidebar-footer > div {
+        max-width: 100%;
+    }
+
+    .sidebar-footer #logout-btn {
+        width: 100% !important;
+    }
+
+    .main-content {
+        padding: var(--space-2);
+    }
+
+    .card-body,
+    .field-editor,
+    .public-form-header,
+    .public-form-body {
+        padding: var(--space-2);
+    }
+
+    .field-palette {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .field-type-btn {
+        justify-content: flex-start;
+        padding: 10px 12px;
+        font-size: 15px;
+    }
+
+    .builder-field {
+        flex-wrap: wrap;
+        padding: var(--space-2);
+    }
+
+    .field-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .modal-overlay {
+        align-items: flex-end;
+        padding: var(--space-1);
+    }
+
+    .modal {
+        max-height: calc(100vh - 16px);
+        border-radius: 24px;
+    }
+
+    .toast-container {
+        top: auto;
+        right: var(--space-1);
+        bottom: var(--space-1);
+        left: var(--space-1);
+    }
+
+    .toast {
+        max-width: none;
+        width: 100%;
+    }
+
+    .share-link-container {
+        flex-direction: column;
+    }
+
     table th,
     table td {
         padding: 12px;
         font-size: 14px;
+    }
+}
+
+@media (max-width: 430px) {
+    .field-palette {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-lg {
+        min-height: 48px;
+        font-size: 18px;
+    }
+
+    .form-card-meta {
+        align-items: stretch;
+        flex-direction: column;
+        gap: var(--space-1);
+    }
+
+    .form-card-actions {
+        gap: var(--space-1);
     }
 }
 

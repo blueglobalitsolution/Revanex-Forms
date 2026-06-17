@@ -99,8 +99,30 @@ function renderFields(fields) {
                     </label>
                 `).join('')}</div>`;
                 break;
+            case 'time':
+                inputHtml = `<input type="time" ${common}>`;
+                break;
+            case 'hidden':
+                inputHtml = `<input type="hidden" id="${fieldId}" value="${escapeHtml(f.placeholder || '')}">`;
+                break;
+            case 'file':
+                inputHtml = `<input type="file" ${common} class="form-input file-upload-input">`;
+                break;
+            case 'rating':
+                inputHtml = `<div class="star-rating">
+                    <input type="radio" id="${fieldId}-5" name="${fieldId}" value="5" ${requiredAttr}><label for="${fieldId}-5" title="5 stars">&#9733;</label>
+                    <input type="radio" id="${fieldId}-4" name="${fieldId}" value="4" ${requiredAttr}><label for="${fieldId}-4" title="4 stars">&#9733;</label>
+                    <input type="radio" id="${fieldId}-3" name="${fieldId}" value="3" ${requiredAttr}><label for="${fieldId}-3" title="3 stars">&#9733;</label>
+                    <input type="radio" id="${fieldId}-2" name="${fieldId}" value="2" ${requiredAttr}><label for="${fieldId}-2" title="2 stars">&#9733;</label>
+                    <input type="radio" id="${fieldId}-1" name="${fieldId}" value="1" ${requiredAttr}><label for="${fieldId}-1" title="1 star">&#9733;</label>
+                </div>`;
+                break;
             default:
                 inputHtml = `<input type="text" ${common}>`;
+        }
+
+        if (f.type === 'hidden') {
+            return inputHtml;
         }
 
         return `
@@ -135,6 +157,7 @@ function collectFormData() {
     const data = {};
     let respondentEmail = null;
     let isValid = true;
+    const filesToUpload = [];
 
     (formConfig.fields || []).forEach(f => {
         const fieldId = `field-${f.id}`;
@@ -147,9 +170,18 @@ function collectFormData() {
                 value = Array.from(checked).map(cb => cb.value).join(', ');
                 break;
             }
-            case 'radio': {
+            case 'radio':
+            case 'rating': {
                 const selected = document.querySelector(`input[name="${fieldId}"]:checked`);
                 value = selected ? selected.value : '';
+                break;
+            }
+            case 'file': {
+                const el = document.getElementById(fieldId);
+                if (el && el.files.length > 0) {
+                    value = el.files[0].name;
+                    filesToUpload.push({ fieldLabel: f.label, file: el.files[0] });
+                }
                 break;
             }
             default: {
@@ -181,7 +213,7 @@ function collectFormData() {
         }
     });
 
-    return isValid ? { data, respondentEmail } : null;
+    return isValid ? { data, respondentEmail, filesToUpload } : null;
 }
 
 async function handleSubmit(e) {
@@ -202,27 +234,40 @@ async function handleSubmit(e) {
     btn.disabled = true;
     btn.textContent = 'Submitting...';
 
-    if (formConfig.razorpay_enabled) {
-        const priceField = (formConfig.fields || []).find(
-            f => f.id === 'price' || f.label.toLowerCase() === 'price'
-        );
-        const priceValue = priceField
-            ? parseFloat(document.getElementById(`field-${priceField.id}`)?.value || '0')
-            : 0;
-
-        if (priceValue > 0) {
-            const paid = await processPayment(priceValue, collected.respondentEmail);
-            if (!paid) {
-                btn.disabled = false;
-                btn.textContent = formConfig?.submit_button_text || 'Submit';
-                return;
-            }
-            collected.payment_id = paid.payment_id;
-            collected.payment_amount = priceValue;
-        }
-    }
-
     try {
+        // Upload files first
+        for (const item of collected.filesToUpload) {
+            const formData = new FormData();
+            formData.append('file', item.file);
+            const res = await fetch(`/api/forms/${getParam('id')}/upload`, {
+                method: 'POST',
+                body: formData
+            });
+            if (!res.ok) throw new Error('File upload failed');
+            const fileData = await res.json();
+            collected.data[item.fieldLabel] = fileData.url;
+        }
+
+        if (formConfig.razorpay_enabled) {
+            const priceField = (formConfig.fields || []).find(
+                f => f.id === 'price' || f.label.toLowerCase() === 'price'
+            );
+            const priceValue = priceField
+                ? parseFloat(document.getElementById(`field-${priceField.id}`)?.value || '0')
+                : 0;
+
+            if (priceValue > 0) {
+                const paid = await processPayment(priceValue, collected.respondentEmail);
+                if (!paid) {
+                    btn.disabled = false;
+                    btn.textContent = formConfig?.submit_button_text || 'Submit';
+                    return;
+                }
+                collected.payment_id = paid.payment_id;
+                collected.payment_amount = priceValue;
+            }
+        }
+
         const payload = {
             data: collected.data,
             respondent_email: collected.respondentEmail || null,
@@ -246,7 +291,11 @@ async function handleSubmit(e) {
 
         if (formConfig.redirect_url) {
             setTimeout(() => {
-                window.location.href = formConfig.redirect_url;
+                let redirectUrl = formConfig.redirect_url;
+                if (!redirectUrl.startsWith('http://') && !redirectUrl.startsWith('https://')) {
+                    redirectUrl = 'https://' + redirectUrl;
+                }
+                window.location.href = redirectUrl;
             }, 3000);
         }
     } catch (err) {

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Form - Revanex Forms</title>
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/auth.js"></script>
 </head>
@@ -11,7 +12,7 @@
     <div class="app-layout">
         <nav class="sidebar">
             <div class="sidebar-header">
-                <h1><span class="logo-icon">&#9998;</span> Revanex Forms</h1>
+                <h1><img src="/assets/logo.png" alt="Revanex Forms" class="logo-icon" style="height: 32px; width: auto;"> Revanex Forms</h1>
             </div>
             <div class="sidebar-nav">
                 <a href="/dashboard.html"><span class="nav-icon">&#9632;</span> Dashboard</a>
@@ -120,7 +121,11 @@
                             <button class="field-type-btn" onclick="addField('checkbox')">&#9744; Checkbox</button>
                             <button class="field-type-btn" onclick="addField('radio')">&#9679; Radio</button>
                             <button class="field-type-btn" onclick="addField('date')">&#128197; Date</button>
+                            <button class="field-type-btn" onclick="addField('time')">&#128338; Time</button>
                             <button class="field-type-btn" onclick="addField('url')">&#128279; URL</button>
+                            <button class="field-type-btn" onclick="addField('rating')">&#9733; Rating</button>
+                            <button class="field-type-btn" onclick="addField('file')">&#128193; File Upload</button>
+                            <button class="field-type-btn" onclick="addField('hidden')">&#128065; Hidden Field</button>
                         </div>
 
                         <!-- Builder Canvas -->
@@ -142,8 +147,8 @@
                                 <label class="form-label">Label <span class="required">*</span></label>
                                 <input class="form-input" id="edit-field-label" placeholder="Field label">
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">Placeholder</label>
+                            <div class="form-group" id="edit-field-placeholder-group">
+                                <label class="form-label" id="edit-field-placeholder-label">Placeholder</label>
                                 <input class="form-input" id="edit-field-placeholder" placeholder="Placeholder text">
                             </div>
                         </div>

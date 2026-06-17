@@ -47,7 +47,11 @@ function getDefaultLabel(type) {
         checkbox: 'Checkbox',
         radio: 'Radio',
         date: 'Date',
-        url: 'Website URL'
+        url: 'Website URL',
+        time: 'Time',
+        rating: 'Star Rating',
+        file: 'File Upload',
+        hidden: 'Hidden Field'
     };
     return labels[type] || 'Field';
 }
@@ -153,6 +157,14 @@ function editField(id) {
     document.getElementById('edit-field-label').value = field.label;
     document.getElementById('edit-field-placeholder').value = field.placeholder;
     document.getElementById('edit-field-required').checked = field.required;
+
+    if (field.type === 'hidden') {
+        document.getElementById('edit-field-placeholder-label').textContent = 'Default Value';
+        document.getElementById('edit-field-placeholder').placeholder = 'Value to pass secretly';
+    } else {
+        document.getElementById('edit-field-placeholder-label').textContent = 'Placeholder';
+        document.getElementById('edit-field-placeholder').placeholder = 'Placeholder text';
+    }
 
     const optionsGroup = document.getElementById('edit-field-options-group');
     if (field.type === 'select' || field.type === 'checkbox' || field.type === 'radio') {

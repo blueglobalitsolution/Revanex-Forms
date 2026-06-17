@@ -30,6 +30,9 @@ app.include_router(forms_router)
 app.include_router(submissions_router)
 app.include_router(payments_router)
 
+import os
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 

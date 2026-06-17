@@ -1,6 +1,7 @@
 import csv
 import io
 import logging
+import re
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
@@ -18,6 +19,32 @@ from backend.schemas import (
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/forms", tags=["forms"])
+
+
+def get_form_by_id_or_slug(db: Session, form_id_or_slug: str) -> Form:
+    # Try to parse as integer ID first
+    try:
+        form_id = int(form_id_or_slug)
+        form = db.query(Form).filter(Form.id == form_id).first()
+        if form:
+            return form
+    except ValueError:
+        pass
+    
+    # Try looking up by slugified title
+    def slugify(text: str) -> str:
+        text = text.lower()
+        text = re.sub(r'[^a-z0-9]+', '-', text)
+        return text.strip('-')
+    
+    target_slug = slugify(form_id_or_slug)
+    forms = db.query(Form).all()
+    for f in forms:
+        if slugify(f.title) == target_slug:
+            return f
+            
+    # Try case-insensitive title match directly
+    return db.query(Form).filter(func.lower(Form.title) == form_id_or_slug.lower()).first()
 
 
 @router.get("", response_model=list[FormListItem])
@@ -61,17 +88,17 @@ def create_form(payload: FormCreate, db: Session = Depends(get_db), current_user
 
 
 @router.get("/{form_id}", response_model=FormResponse)
-def get_form(form_id: int, db: Session = Depends(get_db)):
-    form = db.query(Form).filter(Form.id == form_id).first()
+def get_form(form_id: str, db: Session = Depends(get_db)):
+    form = get_form_by_id_or_slug(db, form_id)
     if not form:
         raise HTTPException(status_code=404, detail="Form not found")
     return form
 
 
 @router.put("/{form_id}", response_model=FormResponse)
-def update_form(form_id: int, payload: FormUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    form = db.query(Form).filter(Form.id == form_id, Form.user_id == current_user.id).first()
-    if not form:
+def update_form(form_id: str, payload: FormUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    form = get_form_by_id_or_slug(db, form_id)
+    if not form or form.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Form not found or access denied")
 
     update_data = payload.model_dump(exclude_unset=True)
@@ -87,9 +114,9 @@ def update_form(form_id: int, payload: FormUpdate, db: Session = Depends(get_db)
 
 
 @router.delete("/{form_id}", response_model=MessageResponse)
-def delete_form(form_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    form = db.query(Form).filter(Form.id == form_id, Form.user_id == current_user.id).first()
-    if not form:
+def delete_form(form_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    form = get_form_by_id_or_slug(db, form_id)
+    if not form or form.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Form not found or access denied")
     db.delete(form)
     db.commit()
@@ -97,28 +124,28 @@ def delete_form(form_id: int, db: Session = Depends(get_db), current_user: User 
 
 
 @router.get("/{form_id}/embed")
-def get_embed_code(form_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    form = db.query(Form).filter(Form.id == form_id, Form.user_id == current_user.id).first()
-    if not form:
+def get_embed_code(form_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    form = get_form_by_id_or_slug(db, form_id)
+    if not form or form.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Form not found or access denied")
     embed = (
-        f'<iframe src="{form_id}" '
+        f'<iframe src="{form.id}" '
         f'width="100%" height="800" frameborder="0" '
         f'style="border:1px solid #e5e7eb;border-radius:8px;max-width:720px;margin:0 auto;display:block">'
         f"</iframe>"
     )
-    return {"embed_code": embed, "direct_link": f"/f/{form_id}"}
+    return {"embed_code": embed, "direct_link": f"/f/{form.id}"}
 
 
 @router.get("/{form_id}/submissions/export")
-def export_submissions_csv(form_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    form = db.query(Form).filter(Form.id == form_id, Form.user_id == current_user.id).first()
-    if not form:
+def export_submissions_csv(form_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    form = get_form_by_id_or_slug(db, form_id)
+    if not form or form.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Form not found or access denied")
 
     submissions = (
         db.query(Submission)
-        .filter(Submission.form_id == form_id)
+        .filter(Submission.form_id == form.id)
         .order_by(Submission.created_at.desc())
         .all()
     )

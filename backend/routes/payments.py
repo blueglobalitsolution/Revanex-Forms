@@ -1,6 +1,8 @@
 import logging
+import re
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from backend.database import get_db
 from backend.models import Form, Submission
 from backend.schemas import (
@@ -16,13 +18,39 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/forms", tags=["payments"])
 
 
+def get_form_by_id_or_slug(db: Session, form_id_or_slug: str) -> Form:
+    # Try to parse as integer ID first
+    try:
+        form_id = int(form_id_or_slug)
+        form = db.query(Form).filter(Form.id == form_id).first()
+        if form:
+            return form
+    except ValueError:
+        pass
+    
+    # Try looking up by slugified title
+    def slugify(text: str) -> str:
+        text = text.lower()
+        text = re.sub(r'[^a-z0-9]+', '-', text)
+        return text.strip('-')
+    
+    target_slug = slugify(form_id_or_slug)
+    forms = db.query(Form).all()
+    for f in forms:
+        if slugify(f.title) == target_slug:
+            return f
+            
+    # Try case-insensitive title match directly
+    return db.query(Form).filter(func.lower(Form.title) == form_id_or_slug.lower()).first()
+
+
 @router.post("/{form_id}/payment/order", response_model=PaymentOrderResponse)
 def create_payment_order(
-    form_id: int,
+    form_id: str,
     payload: PaymentOrderRequest,
     db: Session = Depends(get_db),
 ):
-    form = db.query(Form).filter(Form.id == form_id).first()
+    form = get_form_by_id_or_slug(db, form_id)
     if not form:
         raise HTTPException(status_code=404, detail="Form not found")
     if not form.razorpay_enabled:
@@ -45,11 +73,11 @@ def create_payment_order(
 
 @router.post("/{form_id}/payment/verify", response_model=PaymentVerifyResponse)
 def verify_payment_signature(
-    form_id: int,
+    form_id: str,
     payload: PaymentVerifyRequest,
     db: Session = Depends(get_db),
 ):
-    form = db.query(Form).filter(Form.id == form_id).first()
+    form = get_form_by_id_or_slug(db, form_id)
     if not form:
         raise HTTPException(status_code=404, detail="Form not found")
 
