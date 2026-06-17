@@ -177,6 +177,7 @@ h4 {
 .sidebar-header h1 {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
     font-size: 21px;
     line-height: 29.76px;
@@ -184,18 +185,10 @@ h4 {
 
 .logo-icon {
     display: inline-flex;
-    width: 44px;
+    width: auto;
     height: 44px;
     align-items: center;
     justify-content: center;
-    border-radius: 16px;
-    background: var(--color-primary);
-    color: var(--color-bg);
-    box-shadow: 
-        0px 6px 12px rgba(134, 77, 38, 0.15),
-        inset 3px 3px 6px rgba(255, 255, 255, 0.4),
-        inset -3px -3px 6px rgba(0, 0, 0, 0.15);
-    font-size: 18px;
 }
 
 .sidebar-nav {
