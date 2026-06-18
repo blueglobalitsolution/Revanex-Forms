@@ -2,7 +2,10 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from backend.config import DATABASE_URL
 
-engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20)
+# Import models so they register with Base.metadata
+from backend.models import User, Form, Submission, UserSession
+
+engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -31,7 +34,6 @@ def init_db():
             conn.execute(text("CREATE INDEX ix_forms_slug ON forms(slug)"))
     
     # Backfill slugs for existing forms
-    from backend.models import User, Form
     from backend.config import ADMIN_USERNAME, ADMIN_PASSWORD
     from backend.routes.auth import hash_password
     

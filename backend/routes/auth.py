@@ -167,8 +167,9 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
                 </div>
             </div>
             """
+            recipient_email = user.email or SMTP_EMAIL
             yag.send(
-                to=SMTP_EMAIL,
+                to=recipient_email,
                 subject="Revanex Forms — Password Reset",
                 contents=html_body
             )

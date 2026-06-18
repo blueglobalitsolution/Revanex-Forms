@@ -18,8 +18,13 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/forms", tags=["payments"])
 
 
+def slugify(text: str) -> str:
+    text = text.lower()
+    text = re.sub(r'[^a-z0-9]+', '-', text)
+    return text.strip('-')
+
+
 def get_form_by_id_or_slug(db: Session, form_id_or_slug: str) -> Form:
-    # Try to parse as integer ID first
     try:
         form_id = int(form_id_or_slug)
         form = db.query(Form).filter(Form.id == form_id).first()
@@ -28,19 +33,11 @@ def get_form_by_id_or_slug(db: Session, form_id_or_slug: str) -> Form:
     except ValueError:
         pass
     
-    # Try looking up by slugified title
-    def slugify(text: str) -> str:
-        text = text.lower()
-        text = re.sub(r'[^a-z0-9]+', '-', text)
-        return text.strip('-')
-    
     target_slug = slugify(form_id_or_slug)
-    forms = db.query(Form).all()
-    for f in forms:
-        if slugify(f.title) == target_slug:
-            return f
-            
-    # Try case-insensitive title match directly
+    form = db.query(Form).filter(Form.slug == target_slug).first()
+    if form:
+        return form
+
     return db.query(Form).filter(func.lower(Form.title) == form_id_or_slug.lower()).first()
 
 

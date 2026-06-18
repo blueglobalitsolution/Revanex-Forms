@@ -24,7 +24,10 @@ $resetSql | & $mysqlExe -u root --skip-password mysql
 Start-Sleep -Seconds 2
 
 # Kill the safe-mode mysqld
-Get-Process mysqld -ErrorAction SilentlyContinue | Stop-Process -Force
+$mysqldProcesses = Get-Process mysqld -ErrorAction SilentlyContinue
+if ($mysqldProcesses) {
+    $mysqldProcesses | Stop-Process -Force
+}
 Start-Sleep -Seconds 2
 
 # Start the MySQL service normally

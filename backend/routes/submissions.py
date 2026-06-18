@@ -13,8 +13,13 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/forms", tags=["submissions"])
 
 
+def slugify(text: str) -> str:
+    text = text.lower()
+    text = re.sub(r'[^a-z0-9]+', '-', text)
+    return text.strip('-')
+
+
 def get_form_by_id_or_slug(db: Session, form_id_or_slug: str) -> Form:
-    # Try to parse as integer ID first
     try:
         form_id = int(form_id_or_slug)
         form = db.query(Form).filter(Form.id == form_id).first()
@@ -23,19 +28,11 @@ def get_form_by_id_or_slug(db: Session, form_id_or_slug: str) -> Form:
     except ValueError:
         pass
     
-    # Try looking up by slugified title
-    def slugify(text: str) -> str:
-        text = text.lower()
-        text = re.sub(r'[^a-z0-9]+', '-', text)
-        return text.strip('-')
-    
     target_slug = slugify(form_id_or_slug)
-    forms = db.query(Form).all()
-    for f in forms:
-        if slugify(f.title) == target_slug:
-            return f
-            
-    # Try case-insensitive title match directly
+    form = db.query(Form).filter(Form.slug == target_slug).first()
+    if form:
+        return form
+
     return db.query(Form).filter(func.lower(Form.title) == form_id_or_slug.lower()).first()
 
 
@@ -56,8 +53,8 @@ def submit_form(
         data=payload.data,
         respondent_email=payload.respondent_email or None,
         payment_id=payload.payment_id or None,
-        payment_amount=payload.payment_amount or None,
-        payment_status="captured" if payload.payment_id else "none",
+        payment_amount=payload.payment_amount if payload.payment_amount is not None else None,
+        payment_status="pending" if payload.payment_id else "none",
     )
     db.add(submission)
     db.commit()
