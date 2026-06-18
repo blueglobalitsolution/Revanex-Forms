@@ -21,8 +21,29 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/forms", tags=["forms"])
 
 
+def slugify(text: str) -> str:
+    text = text.lower()
+    text = re.sub(r'[^a-z0-9]+', '-', text)
+    return text.strip('-')
+
+
+def generate_unique_slug(db: Session, title: str, exclude_id: int | None = None) -> str:
+    base_slug = slugify(title)
+    if not base_slug:
+        base_slug = "untitled"
+    slug = base_slug
+    counter = 1
+    while True:
+        query = db.query(Form).filter(Form.slug == slug)
+        if exclude_id is not None:
+            query = query.filter(Form.id != exclude_id)
+        if not query.first():
+            return slug
+        slug = f"{base_slug}-{counter}"
+        counter += 1
+
+
 def get_form_by_id_or_slug(db: Session, form_id_or_slug: str) -> Form:
-    # Try to parse as integer ID first
     try:
         form_id = int(form_id_or_slug)
         form = db.query(Form).filter(Form.id == form_id).first()
@@ -31,19 +52,11 @@ def get_form_by_id_or_slug(db: Session, form_id_or_slug: str) -> Form:
     except ValueError:
         pass
     
-    # Try looking up by slugified title
-    def slugify(text: str) -> str:
-        text = text.lower()
-        text = re.sub(r'[^a-z0-9]+', '-', text)
-        return text.strip('-')
-    
     target_slug = slugify(form_id_or_slug)
-    forms = db.query(Form).all()
-    for f in forms:
-        if slugify(f.title) == target_slug:
-            return f
-            
-    # Try case-insensitive title match directly
+    form = db.query(Form).filter(Form.slug == target_slug).first()
+    if form:
+        return form
+
     return db.query(Form).filter(func.lower(Form.title) == form_id_or_slug.lower()).first()
 
 
@@ -72,6 +85,7 @@ def create_form(payload: FormCreate, db: Session = Depends(get_db), current_user
     form = Form(
         user_id=current_user.id,
         title=payload.title,
+        slug=generate_unique_slug(db, payload.title),
         description=payload.description,
         fields=[f.model_dump() for f in payload.fields],
         razorpay_enabled=payload.razorpay_enabled,
@@ -104,6 +118,9 @@ def update_form(form_id: str, payload: FormUpdate, db: Session = Depends(get_db)
     update_data = payload.model_dump(exclude_unset=True)
     if "fields" in update_data and update_data["fields"] is not None:
         update_data["fields"] = [f.model_dump() if hasattr(f, 'model_dump') else f for f in update_data["fields"]]
+
+    if "title" in update_data and update_data["title"]:
+        update_data["slug"] = generate_unique_slug(db, update_data["title"], exclude_id=form.id)
 
     for key, value in update_data.items():
         setattr(form, key, value)

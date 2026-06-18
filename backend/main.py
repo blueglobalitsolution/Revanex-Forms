@@ -2,7 +2,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from backend.config import APP_NAME
+from backend.config import APP_NAME, APP_URL
 from backend.database import init_db
 from backend.routes.forms import router as forms_router
 from backend.routes.submissions import router as submissions_router
@@ -17,9 +17,13 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title=APP_NAME, version="1.0.0")
 
+origins = ["http://localhost:8000", "http://127.0.0.1:8000", "http://localhost:5173", "http://127.0.0.1:5173"]
+if APP_URL and "localhost" not in APP_URL and "127.0.0.1" not in APP_URL:
+    origins = [APP_URL]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

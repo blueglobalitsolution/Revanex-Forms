@@ -88,14 +88,17 @@ def login_user(payload: UserCreate, response: Response, db: Session = Depends(ge
     # Create session
     token = create_session(user.id, db)
     
-    # Set cookie
+    from backend.config import APP_URL
+
+    is_https = APP_URL.startswith("https")
+
     response.set_cookie(
         key=SESSION_COOKIE_NAME,
         value=token,
         max_age=SESSION_DURATION_DAYS * 24 * 60 * 60,
         httponly=True,
         samesite="lax",
-        secure=False,
+        secure=is_https,
     )
     
     return user
@@ -110,11 +113,15 @@ def logout_user(request: Request, response: Response, db: Session = Depends(get_
             db.delete(session)
             db.commit()
             
+    from backend.config import APP_URL
+
+    is_https = APP_URL.startswith("https")
+
     response.delete_cookie(
         key=SESSION_COOKIE_NAME,
         httponly=True,
         samesite="lax",
-        secure=False,
+        secure=is_https,
     )
     return MessageResponse(message="Logged out successfully")
 

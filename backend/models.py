@@ -36,6 +36,7 @@ class Form(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
     title = Column(String(255), nullable=False)
+    slug = Column(String(255), nullable=True, index=True)
     description = Column(Text, nullable=True)
     fields = Column(JSON, nullable=False, default=list)
     razorpay_enabled = Column(Boolean, default=False)
