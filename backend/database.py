@@ -2,15 +2,17 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from backend.config import DATABASE_URL
 
-# Import models so they register with Base.metadata
-from backend.models import User, Form, Submission, UserSession
-
-engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20, pool_pre_ping=True)
+if DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+else:
+    engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
 
 class Base(DeclarativeBase):
     pass
+
+# Import models so they register with Base.metadata
+from backend.models import User, Form, Submission, UserSession
 
 
 def get_db():
@@ -62,7 +64,7 @@ def init_db():
         db.close()
 
 
-def _generate_slug(db: Session, title: str, exclude_id: int | None = None) -> str:
+def _generate_slug(db, title: str, exclude_id: int | None = None) -> str:
     import re
     text = title.lower()
     text = re.sub(r'[^a-z0-9]+', '-', text)
