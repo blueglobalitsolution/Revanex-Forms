@@ -96,6 +96,29 @@ def verify_payment_signature(
                 submission.payment_id = payload.razorpay_payment_id
                 submission.payment_status = "captured"
                 db.commit()
+                
+                # Send emails on successful payment
+                from backend.services.email_service import send_notification, send_admin_notification
+                from backend.config import ADMIN_EMAIL
+                try:
+                    if submission.respondent_email:
+                        send_notification(
+                            to_email=submission.respondent_email,
+                            form_title=form.title,
+                            submission_data=submission.data,
+                            form_id=form.id,
+                            submission_id=submission.id,
+                        )
+                    
+                    send_admin_notification(
+                        admin_email=ADMIN_EMAIL,
+                        form_title=form.title,
+                        submission_data=submission.data,
+                        form_id=form.id,
+                        submission_id=submission.id,
+                    )
+                except Exception as e:
+                    logger.error("Email notification error after payment: %s", str(e))
 
         return PaymentVerifyResponse(
             status="success",

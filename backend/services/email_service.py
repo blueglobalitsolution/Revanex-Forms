@@ -1,6 +1,8 @@
 import logging
-import yagmail
-from backend.config import SMTP_EMAIL, SMTP_PASSWORD, SMTP_NAME, APP_NAME, APP_URL
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from backend.config import SMTP_EMAIL, SMTP_PASSWORD, SMTP_NAME, SMTP_HOST, SMTP_PORT, SMTP_FROM_EMAIL, APP_NAME, APP_URL
 
 logger = logging.getLogger(__name__)
 
@@ -17,11 +19,6 @@ def send_notification(
         return False
 
     try:
-        yag = yagmail.SMTP(
-            {SMTP_EMAIL: SMTP_NAME},
-            SMTP_PASSWORD,
-        )
-
         fields_html = ""
         for key, value in submission_data.items():
             fields_html += f"<tr><td style='padding:8px 12px;border:1px solid #ddd;font-weight:600'>{key}</td><td style='padding:8px 12px;border:1px solid #ddd'>{value}</td></tr>"
@@ -53,11 +50,18 @@ def send_notification(
         </div>
         """
 
-        yag.send(
-            to=to_email,
-            subject=f"Submission Confirmation — {form_title}",
-            contents=html_body,
-        )
+        message = MIMEMultipart("alternative")
+        message["Subject"] = f"Submission Confirmation — {form_title}"
+        message["From"] = f"{SMTP_NAME} <{SMTP_FROM_EMAIL}>"
+        message["To"] = to_email
+        message.attach(MIMEText(html_body, "html"))
+
+        server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
+        if SMTP_PORT == 587:
+            server.starttls()
+        server.login(SMTP_EMAIL, SMTP_PASSWORD)
+        server.sendmail(SMTP_FROM_EMAIL, to_email, message.as_string())
+        server.quit()
 
         logger.info("Notification email sent to %s", to_email)
         return True
@@ -79,11 +83,6 @@ def send_admin_notification(
         return False
 
     try:
-        yag = yagmail.SMTP(
-            {SMTP_EMAIL: SMTP_NAME},
-            SMTP_PASSWORD,
-        )
-
         fields_html = ""
         for key, value in submission_data.items():
             fields_html += f"<tr><td style='padding:8px 12px;border:1px solid #ddd;font-weight:600'>{key}</td><td style='padding:8px 12px;border:1px solid #ddd'>{value}</td></tr>"
@@ -121,11 +120,18 @@ def send_admin_notification(
         </div>
         """
 
-        yag.send(
-            to=admin_email,
-            subject=f"New Submission — {form_title}",
-            contents=html_body,
-        )
+        message = MIMEMultipart("alternative")
+        message["Subject"] = f"New Submission — {form_title}"
+        message["From"] = f"{SMTP_NAME} <{SMTP_FROM_EMAIL}>"
+        message["To"] = admin_email
+        message.attach(MIMEText(html_body, "html"))
+
+        server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
+        if SMTP_PORT == 587:
+            server.starttls()
+        server.login(SMTP_EMAIL, SMTP_PASSWORD)
+        server.sendmail(SMTP_FROM_EMAIL, admin_email, message.as_string())
+        server.quit()
 
         logger.info("Admin notification sent to %s", admin_email)
         return True

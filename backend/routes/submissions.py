@@ -63,25 +63,27 @@ def submit_form(
     db.commit()
     db.refresh(submission)
 
-    try:
-        if payload.respondent_email:
-            send_notification(
-                to_email=payload.respondent_email,
-                form_title=form.title,
-                submission_data=payload.data,
-                form_id=form.id,
-                submission_id=submission.id,
-            )
-        if form.notification_email:
+    if not form.razorpay_enabled:
+        from backend.config import ADMIN_EMAIL
+        try:
+            if payload.respondent_email:
+                send_notification(
+                    to_email=payload.respondent_email,
+                    form_title=form.title,
+                    submission_data=payload.data,
+                    form_id=form.id,
+                    submission_id=submission.id,
+                )
+            
             send_admin_notification(
-                admin_email=form.notification_email,
+                admin_email=ADMIN_EMAIL,
                 form_title=form.title,
                 submission_data=payload.data,
                 form_id=form.id,
                 submission_id=submission.id,
             )
-    except Exception as e:
-        logger.error("Email notification error: %s", str(e))
+        except Exception as e:
+            logger.error("Email notification error: %s", str(e))
 
     return submission
 
