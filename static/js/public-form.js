@@ -75,23 +75,25 @@ function renderFields(fields) {
 
         switch (f.type) {
             case 'text':
+                inputHtml = `<input type="text" ${common} placeholder="${escapeHtml(f.placeholder)}" maxlength="500">`;
+                break;
             case 'url':
-                inputHtml = `<input type="${f.type}" ${common} placeholder="${escapeHtml(f.placeholder)}">`;
+                inputHtml = `<input type="url" ${common} placeholder="${escapeHtml(f.placeholder)}" maxlength="2000">`;
                 break;
             case 'email':
-                inputHtml = `<input type="email" ${common} placeholder="${escapeHtml(f.placeholder)}" oninput="checkPriceField()">`;
+                inputHtml = `<input type="email" ${common} placeholder="${escapeHtml(f.placeholder)}" maxlength="254" oninput="checkPriceField()">`;
                 break;
             case 'number':
-                inputHtml = `<input type="number" ${common} placeholder="${escapeHtml(f.placeholder)}" step="0.01" oninput="checkPriceField()">`;
+                inputHtml = `<input type="number" ${common} placeholder="${escapeHtml(f.placeholder)}" step="0.01" min="0" max="9999999999" oninput="checkPriceField()">`;
                 break;
             case 'tel':
-                inputHtml = `<input type="tel" ${common} placeholder="${escapeHtml(f.placeholder)}">`;
+                inputHtml = `<input type="tel" ${common} placeholder="${escapeHtml(f.placeholder)}" maxlength="15" inputmode="numeric" pattern="[0-9+\-() ]{10,15}" title="Enter a valid phone number (10-15 digits with +, -, (, ), spaces)">`;
                 break;
             case 'date':
                 inputHtml = `<input type="date" ${common}>`;
                 break;
             case 'textarea':
-                inputHtml = `<textarea ${common} placeholder="${escapeHtml(f.placeholder)}" rows="4"></textarea>`;
+                inputHtml = `<textarea ${common} placeholder="${escapeHtml(f.placeholder)}" rows="4" maxlength="5000"></textarea>`;
                 break;
             case 'select':
                 const opts = (f.options || []).map(o =>
@@ -210,24 +212,51 @@ function collectFormData() {
 
         data[f.label] = value;
 
-        if (f.type === 'email' && value) {
+        if ((f.type === 'email' || f.label.toLowerCase().includes('email')) && value) {
             respondentEmail = value;
         }
 
-        if (f.required) {
-            if (!value) {
-                isValid = false;
-                if (errorEl) {
-                    errorEl.textContent = 'This field is required';
-                    errorEl.classList.add('visible');
-                }
-                const input = document.getElementById(fieldId);
-                if (input) input.classList.add('error');
-            } else {
-                if (errorEl) errorEl.classList.remove('visible');
-                const input = document.getElementById(fieldId);
-                if (input) input.classList.remove('error');
+        let fieldError = null;
+        if (f.required && !value) {
+            fieldError = 'This field is required';
+        } else if (value) {
+            switch (f.type) {
+                case 'tel':
+                    const digits = value.replace(/[^0-9]/g, '');
+                    if (digits.length < 10 || digits.length > 15) {
+                        fieldError = 'Phone number must have 10-15 digits';
+                    }
+                    break;
+                case 'email':
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                        fieldError = 'Enter a valid email address';
+                    }
+                    break;
+                case 'number':
+                    if (isNaN(parseFloat(value)) || parseFloat(value) < 0) {
+                        fieldError = 'Enter a valid positive number';
+                    }
+                    break;
+                case 'url':
+                    if (!/^https?:\/\/.+/.test(value)) {
+                        fieldError = 'Enter a valid URL (starting with http:// or https://)';
+                    }
+                    break;
             }
+        }
+
+        if (fieldError) {
+            isValid = false;
+            if (errorEl) {
+                errorEl.textContent = fieldError;
+                errorEl.classList.add('visible');
+            }
+            const input = document.getElementById(fieldId);
+            if (input) input.classList.add('error');
+        } else {
+            if (errorEl) errorEl.classList.remove('visible');
+            const input = document.getElementById(fieldId);
+            if (input) input.classList.remove('error');
         }
     });
 

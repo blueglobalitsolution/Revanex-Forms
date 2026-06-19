@@ -48,6 +48,45 @@ def submit_form(
     if not form.is_active:
         raise HTTPException(status_code=400, detail="This form is no longer accepting submissions")
 
+    form_fields = form.fields or []
+    for field_config in form_fields:
+        field_label = field_config.get("label", "")
+        field_type = field_config.get("type", "")
+        value = payload.data.get(field_label, "")
+
+        if not value:
+            continue
+
+        if field_type == "tel":
+            digits_only = re.sub(r"[^0-9]", "", value)
+            if len(digits_only) < 10 or len(digits_only) > 15:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"'{field_label}' must contain 10-15 digits",
+                )
+        elif field_type == "email":
+            if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', value):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"'{field_label}' is not a valid email address",
+                )
+        elif field_type == "url":
+            if not value.startswith(("http://", "https://")):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"'{field_label}' must start with http:// or https://",
+                )
+        elif field_type == "number":
+            try:
+                num = float(value)
+                if num < 0:
+                    raise ValueError
+            except (ValueError, TypeError):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"'{field_label}' must be a valid positive number",
+                )
+
     submission = Submission(
         form_id=form.id,
         data=payload.data,

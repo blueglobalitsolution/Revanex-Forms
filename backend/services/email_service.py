@@ -57,8 +57,10 @@ def send_notification(
         message.attach(MIMEText(html_body, "html"))
 
         server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
+        server.ehlo()
         if SMTP_PORT == 587:
             server.starttls()
+            server.ehlo()
         server.login(SMTP_EMAIL, SMTP_PASSWORD)
         server.sendmail(SMTP_FROM_EMAIL, to_email, message.as_string())
         server.quit()
@@ -127,8 +129,10 @@ def send_admin_notification(
         message.attach(MIMEText(html_body, "html"))
 
         server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
+        server.ehlo()
         if SMTP_PORT == 587:
             server.starttls()
+            server.ehlo()
         server.login(SMTP_EMAIL, SMTP_PASSWORD)
         server.sendmail(SMTP_FROM_EMAIL, admin_email, message.as_string())
         server.quit()
