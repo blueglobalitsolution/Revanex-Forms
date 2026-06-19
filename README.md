@@ -1,6 +1,6 @@
 # Revanex Forms
 
-A production-ready custom web form application built with **FastAPI**, **MySQL**, **vanilla HTML/CSS/JS**, **yagmail**, and **Razorpay**.
+A production-ready custom web form application built with **FastAPI**, **SQLite**, **vanilla HTML/CSS/JS**, **yagmail**, and **Razorpay**.
 
 ## Features
 
@@ -18,7 +18,7 @@ A production-ready custom web form application built with **FastAPI**, **MySQL**
 | -------- | ------------------ |
 | Frontend | HTML, CSS, JavaScript (vanilla) |
 | Backend  | FastAPI (Python)   |
-| Database | MySQL              |
+| Database | SQLite             |
 | Email    | yagmail (Gmail SMTP) |
 | Payments | Razorpay           |
 
@@ -58,7 +58,6 @@ Revanex-Forms/
 ## Prerequisites
 
 - **Python 3.10+**
-- **MySQL 8.0+**
 - **Gmail account** (for yagmail email delivery)
 - **Razorpay account** (optional, for payments)
 
@@ -97,8 +96,8 @@ cp .env.example .env
 Edit `.env` with your settings:
 
 ```ini
-# MySQL connection string
-DATABASE_URL=mysql+pymysql://root:yourpassword@localhost:3306/revanex_forms
+# SQLite connection string
+DATABASE_URL=sqlite:///./revanex_forms.db
 
 # Gmail SMTP (yagmail)
 SMTP_EMAIL=your-email@gmail.com
@@ -112,15 +111,10 @@ RAZORPAY_KEY_SECRET=
 
 > **Gmail App Password**: Go to your Google Account → Security → 2-Step Verification → App passwords. Generate one for "Mail". Use that 16-character password here.
 
-### 5. Create MySQL Database
+### 5. Create Database
 
-Open MySQL CLI or a GUI tool and run:
-
-```sql
-CREATE DATABASE revanex_forms CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-Tables are created automatically on first startup.
+The SQLite database file (`revanex_forms.db`) will be automatically created on the first startup.
+Tables are created automatically.
 
 ### 6. Run the Application
 
