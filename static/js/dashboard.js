@@ -61,8 +61,8 @@ async function fetchForms() {
                     </div>
                     <div class="form-card-actions">
                         <button class="btn btn-secondary btn-sm" onclick="shareForm('${slug}')">Share</button>
-                        <a href="/submissions.html?form_id=${form.id}" class="btn btn-secondary btn-sm">View</a>
-                        <a href="/create-form.html?edit=${form.id}" class="btn btn-secondary btn-sm">Edit</a>
+                        <a href="/submissions?form_id=${form.id}" class="btn btn-secondary btn-sm">View</a>
+                        <a href="/create-form?edit=${form.id}" class="btn btn-secondary btn-sm">Edit</a>
                         <button class="btn btn-danger btn-sm" onclick="promptDelete(${form.id}, '${escapeHtml(form.title)}')">Delete</button>
                     </div>
                 </div>
@@ -77,8 +77,8 @@ async function fetchForms() {
 }
 
 function shareForm(formSlugOrId) {
-    const link = `${window.location.origin}/form.html?id=${formSlugOrId}`;
-    const embed = `<iframe src="${window.location.origin}/form.html?id=${formSlugOrId}" width="100%" height="800" frameborder="0" style="border:1px solid #fbfbf2;border-radius:10px;max-width:720px;margin:0 auto;display:block"></iframe>`;
+    const link = `${window.location.origin}/form?id=${formSlugOrId}`;
+    const embed = `<iframe src="${window.location.origin}/form?id=${formSlugOrId}" width="100%" height="800" frameborder="0" style="border:1px solid #fbfbf2;border-radius:10px;max-width:720px;margin:0 auto;display:block"></iframe>`;
 
     document.getElementById('share-link').value = link;
     document.getElementById('embed-code').value = embed;

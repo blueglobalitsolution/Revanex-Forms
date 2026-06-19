@@ -256,7 +256,7 @@ async function saveForm() {
 
         showToast(editFormId ? 'Form updated!' : 'Form created!');
         setTimeout(() => {
-            window.location.href = '/dashboard.html';
+            window.location.href = '/dashboard';
         }, 800);
     } catch (err) {
         showToast(err.message, 'error');
