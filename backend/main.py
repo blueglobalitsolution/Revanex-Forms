@@ -38,8 +38,35 @@ app.include_router(submissions_router)
 app.include_router(payments_router)
 
 import os
+from fastapi.responses import FileResponse
+
 os.makedirs("uploads", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
+@app.get("/dashboard")
+async def get_dashboard():
+    return FileResponse("static/dashboard.html")
+
+@app.get("/login")
+async def get_login():
+    return FileResponse("static/login.html")
+
+@app.get("/create-form")
+async def get_create_form():
+    return FileResponse("static/create-form.html")
+
+@app.get("/submissions")
+async def get_submissions():
+    return FileResponse("static/submissions.html")
+
+@app.get("/settings")
+async def get_settings():
+    return FileResponse("static/settings.html")
+
+@app.get("/form")
+async def get_form():
+    return FileResponse("static/form.html")
+
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 

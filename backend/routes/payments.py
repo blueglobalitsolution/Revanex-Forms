@@ -107,13 +107,15 @@ def verify_payment_signature(
                             submission_id=submission.id,
                         )
                     
-                    send_admin_notification(
-                        admin_email=ADMIN_EMAIL,
-                        form_title=form.title,
-                        submission_data=submission.data,
-                        form_id=form.id,
-                        submission_id=submission.id,
-                    )
+                    target_email = form.notification_email or ADMIN_EMAIL
+                    if target_email:
+                        send_admin_notification(
+                            admin_email=target_email,
+                            form_title=form.title,
+                            submission_data=submission.data,
+                            form_id=form.id,
+                            submission_id=submission.id,
+                        )
                 except Exception as e:
                     logger.error("Email notification error after payment: %s", str(e))
 

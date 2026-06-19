@@ -40,6 +40,8 @@ async function loadForm() {
         }
 
         renderFields(formConfig.fields || []);
+        
+        setTimeout(checkPriceField, 100);
     } catch (err) {
         showError(err.message);
     }
@@ -50,6 +52,11 @@ function renderFields(fields) {
     const sorted = [...fields].sort((a, b) => a.order - b.order);
 
     container.innerHTML = sorted.map(f => {
+        const isFixedPrice = f.id === 'price' && f.placeholder && !isNaN(parseFloat(f.placeholder)) && parseFloat(f.placeholder) > 0;
+        if (isFixedPrice) {
+            return `<input type="hidden" id="field-${f.id}" value="${escapeHtml(f.placeholder)}">`;
+        }
+
         const requiredAttr = f.required ? 'required' : '';
         const requiredMark = f.required ? '<span class="required">*</span>' : '';
         const fieldId = `field-${f.id}`;

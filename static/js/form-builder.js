@@ -22,12 +22,16 @@ function generateFieldId() {
 }
 
 function addField(type) {
+    const fieldId = type === 'price' ? 'price' : generateFieldId();
+    if (type === 'price') {
+        fields = fields.filter(f => f.id !== 'price');
+    }
     const field = {
-        id: generateFieldId(),
-        type: type,
+        id: fieldId,
+        type: type === 'price' ? 'number' : type,
         label: getDefaultLabel(type),
-        placeholder: '',
-        required: false,
+        placeholder: type === 'price' ? '0.00' : '',
+        required: type === 'price' ? true : false,
         options: [],
         order: fields.length
     };
@@ -51,7 +55,8 @@ function getDefaultLabel(type) {
         time: 'Time',
         rating: 'Star Rating',
         file: 'File Upload',
-        hidden: 'Hidden Field'
+        hidden: 'Hidden Field',
+        price: 'Payment Amount'
     };
     return labels[type] || 'Field';
 }
@@ -161,6 +166,9 @@ function editField(id) {
     if (field.type === 'hidden') {
         document.getElementById('edit-field-placeholder-label').textContent = 'Default Value';
         document.getElementById('edit-field-placeholder').placeholder = 'Value to pass secretly';
+    } else if (field.id === 'price') {
+        document.getElementById('edit-field-placeholder-label').textContent = 'Fixed Amount';
+        document.getElementById('edit-field-placeholder').placeholder = 'e.g. 30 (leave empty for user input)';
     } else {
         document.getElementById('edit-field-placeholder-label').textContent = 'Placeholder';
         document.getElementById('edit-field-placeholder').placeholder = 'Placeholder text';
@@ -226,8 +234,6 @@ async function saveForm() {
             order: f.order
         })),
         razorpay_enabled: document.getElementById('razorpay-toggle').checked,
-        razorpay_key_id: document.getElementById('razorpay-key-id').value.trim() || '',
-        razorpay_key_secret: document.getElementById('razorpay-key-secret').value.trim() || '',
         notification_email: document.getElementById('notification-email').value.trim() || '',
         submit_button_text: document.getElementById('submit-text').value.trim() || 'Submit',
         redirect_url: document.getElementById('redirect-url').value.trim() || ''
@@ -280,8 +286,6 @@ async function loadForm(formId) {
         document.getElementById('redirect-url').value = form.redirect_url || '';
 
         document.getElementById('razorpay-toggle').checked = form.razorpay_enabled;
-        document.getElementById('razorpay-key-id').value = form.razorpay_key_id || '';
-        document.getElementById('razorpay-key-secret').value = form.razorpay_key_secret || '';
         toggleRazorpaySettings();
 
         fields = (form.fields || []).map((f, i) => ({

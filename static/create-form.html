@@ -87,17 +87,7 @@
                     </label>
                 </div>
                 <div class="card-body" id="razorpay-settings" style="display:none">
-                    <div class="grid grid-2">
-                        <div class="form-group">
-                            <label class="form-label">Razorpay Key ID</label>
-                            <input class="form-input" id="razorpay-key-id" placeholder="rzp_live_xxxxxxxx">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Razorpay Key Secret</label>
-                            <input class="form-input" id="razorpay-key-secret" type="password" placeholder="Your Razorpay secret">
-                        </div>
-                    </div>
-                    <div class="alert alert-info">
+                    <div class="alert alert-info" style="margin-bottom:0">
                         <span>&#8505;</span>
                         <span>Add a <strong>Price</strong> field to your form to let respondents set their payment amount. The field ID should be <code>price</code>.</span>
                     </div>
@@ -116,6 +106,7 @@
                             <button class="field-type-btn" onclick="addField('email')">&#9993; Email</button>
                             <button class="field-type-btn" onclick="addField('textarea')">&#9776; Textarea</button>
                             <button class="field-type-btn" onclick="addField('number')">&#35; Number</button>
+                            <button class="field-type-btn" onclick="addField('price')">&#128176; Price</button>
                             <button class="field-type-btn" onclick="addField('tel')">&#9742; Phone</button>
                             <button class="field-type-btn" onclick="addField('select')">&#9660; Dropdown</button>
                             <button class="field-type-btn" onclick="addField('checkbox')">&#9744; Checkbox</button>
