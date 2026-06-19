@@ -56,7 +56,8 @@ function getDefaultLabel(type) {
         rating: 'Star Rating',
         file: 'File Upload',
         hidden: 'Hidden Field',
-        price: 'Payment Amount'
+        price: 'Payment Amount',
+        note: 'Note'
     };
     return labels[type] || 'Field';
 }
@@ -166,6 +167,9 @@ function editField(id) {
     if (field.type === 'hidden') {
         document.getElementById('edit-field-placeholder-label').textContent = 'Default Value';
         document.getElementById('edit-field-placeholder').placeholder = 'Value to pass secretly';
+    } else if (field.type === 'note') {
+        document.getElementById('edit-field-placeholder-label').textContent = 'Note Content';
+        document.getElementById('edit-field-placeholder').placeholder = 'Type the instructions or note here';
     } else if (field.id === 'price') {
         document.getElementById('edit-field-placeholder-label').textContent = 'Fixed Amount';
         document.getElementById('edit-field-placeholder').placeholder = 'e.g. 30 (leave empty for user input)';

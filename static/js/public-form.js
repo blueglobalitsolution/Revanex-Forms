@@ -52,6 +52,15 @@ function renderFields(fields) {
     const sorted = [...fields].sort((a, b) => a.order - b.order);
 
     container.innerHTML = sorted.map(f => {
+        if (f.type === 'note') {
+            return `
+                <div class="form-group" style="background-color: var(--gray-50); padding: 16px; border-radius: var(--radius-md); border-left: 4px solid var(--primary);">
+                    ${f.label ? `<h4 style="margin-top: 0; margin-bottom: 8px; color: var(--gray-900); font-weight: 500;">${escapeHtml(f.label)}</h4>` : ''}
+                    <div style="margin: 0; color: var(--gray-600); font-size: 14px; white-space: pre-wrap; line-height: 1.5;">${escapeHtml(f.placeholder || '')}</div>
+                </div>
+            `;
+        }
+
         const isFixedPrice = f.id === 'price' && f.placeholder && !isNaN(parseFloat(f.placeholder)) && parseFloat(f.placeholder) > 0;
         if (isFixedPrice) {
             return `<input type="hidden" id="field-${f.id}" value="${escapeHtml(f.placeholder)}">`;
@@ -167,6 +176,8 @@ function collectFormData() {
     const filesToUpload = [];
 
     (formConfig.fields || []).forEach(f => {
+        if (f.type === 'note') return;
+
         const fieldId = `field-${f.id}`;
         const errorEl = document.getElementById(`error-${f.id}`);
         let value = '';
