@@ -66,5 +66,14 @@ nosetests.xml
 coverage.xml
 *.cover
 
+# Backup files
+*.bak
+*.backup
+
+# Server config files
+.htaccess
+.user.ini
+.python-version
+
 # Project specific
 uploads/
