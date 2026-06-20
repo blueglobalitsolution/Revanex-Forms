@@ -11,6 +11,27 @@ function showToast(message, type = 'success') {
     setTimeout(() => toast.remove(), 4000);
 }
 
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        if(btn.getAttribute('onclick').includes(tabId)) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+        content.style.display = 'none';
+    });
+
+    const targetContent = document.getElementById('tab-' + tabId);
+    if(targetContent) {
+        targetContent.classList.add('active');
+        targetContent.style.display = 'block';
+    }
+}
+
 function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str;
@@ -149,7 +170,8 @@ function removeField(id) {
     fields.forEach((f, i) => f.order = i);
     if (editingFieldId === id) {
         editingFieldId = null;
-        document.getElementById('field-editor').classList.remove('active');
+        document.getElementById('field-editor').style.display = 'none';
+        document.getElementById('field-editor-empty').style.display = 'flex';
     }
     renderCanvas();
 }
@@ -186,7 +208,8 @@ function editField(id) {
         optionsGroup.style.display = 'none';
     }
 
-    document.getElementById('field-editor').classList.add('active');
+    document.getElementById('field-editor-empty').style.display = 'none';
+    document.getElementById('field-editor').style.display = 'block';
     renderCanvas();
 }
 
@@ -204,8 +227,6 @@ function saveFieldEdit() {
         field.options = raw.split('\n').map(s => s.trim()).filter(s => s.length > 0);
     }
 
-    editingFieldId = null;
-    document.getElementById('field-editor').classList.remove('active');
     renderCanvas();
 }
 

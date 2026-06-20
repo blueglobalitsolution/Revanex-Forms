@@ -43,63 +43,17 @@
 
             <div id="alert-container"></div>
 
-            <!-- Form Settings -->
-            <div class="card" style="margin-bottom:24px">
-                <div class="card-header"><h3>Form Settings</h3></div>
-                <div class="card-body">
-                    <div class="grid grid-2">
-                        <div class="form-group">
-                            <label class="form-label">Form Title <span class="required">*</span></label>
-                            <input class="form-input" id="form-title" placeholder="e.g. Contact Us" value="Untitled Form">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Notification Email</label>
-                            <input class="form-input" id="notification-email" type="email" placeholder="you@example.com">
-                            <span class="form-hint">Receive email when someone submits this form</span>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <textarea class="form-textarea" id="form-description" placeholder="Form description shown to respondents..." rows="3"></textarea>
-                    </div>
-                    <div class="grid grid-2">
-                        <div class="form-group">
-                            <label class="form-label">Submit Button Text</label>
-                            <input class="form-input" id="submit-text" value="Submit">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Redirect URL (after submission)</label>
-                            <input class="form-input" id="redirect-url" placeholder="https://example.com/thank-you">
-                            <span class="form-hint">Leave empty to show a success message</span>
-                        </div>
-                    </div>
-                </div>
+            <div class="form-builder-tabs">
+                <button class="tab-btn active" onclick="switchTab('build')">Build</button>
+                <button class="tab-btn" onclick="switchTab('settings')">Settings</button>
+                <button class="tab-btn" onclick="switchTab('payment')">Payment</button>
             </div>
 
-            <!-- Razorpay Settings -->
-            <div class="card" style="margin-bottom:24px">
-                <div class="card-header">
-                    <h3>Payment Integration</h3>
-                    <label class="toggle">
-                        <input type="checkbox" id="razorpay-toggle" onchange="toggleRazorpaySettings()">
-                        <span class="toggle-slider"></span>
-                        <span class="toggle-label">Enable Razorpay</span>
-                    </label>
-                </div>
-                <div class="card-body" id="razorpay-settings" style="display:none">
-                    <div class="alert alert-info" style="margin-bottom:0">
-                        <span>&#8505;</span>
-                        <span>Add a <strong>Price</strong> field to your form to let respondents set their payment amount. The field ID should be <code>price</code>.</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Form Builder -->
-            <div class="card">
-                <div class="card-header"><h3>Form Fields</h3></div>
-                <div class="card-body">
-                    <div class="builder-layout">
-                        <!-- Field Palette -->
+            <!-- TAB: BUILD -->
+            <div id="tab-build" class="tab-content active">
+                <div class="builder-layout-3col">
+                    <!-- Left Sidebar: Field Palette -->
+                    <div class="builder-sidebar left-sidebar">
                         <div class="field-palette">
                             <h4>Field Types</h4>
                             <button class="field-type-btn" onclick="addField('text')">&#9998; Text</button>
@@ -119,8 +73,10 @@
                             <button class="field-type-btn" onclick="addField('file')">&#128193; File Upload</button>
                             <button class="field-type-btn" onclick="addField('hidden')">&#128065; Hidden Field</button>
                         </div>
+                    </div>
 
-                        <!-- Builder Canvas -->
+                    <!-- Center: Builder Canvas -->
+                    <div class="builder-center">
                         <div id="builder-canvas" class="builder-canvas">
                             <div class="canvas-empty" id="canvas-empty">
                                 <div class="icon">+</div>
@@ -130,34 +86,90 @@
                         </div>
                     </div>
 
-                    <!-- Field Editor -->
-                    <div class="field-editor" id="field-editor">
-                        <h4 style="margin-bottom:16px">Edit Field</h4>
-                        <input type="hidden" id="edit-field-id">
-                        <div class="grid grid-2">
+                    <!-- Right Sidebar: Field Editor -->
+                    <div class="builder-sidebar right-sidebar">
+                        <div class="field-editor" id="field-editor" style="display: none;">
+                            <h4 style="margin-bottom:16px">Field Properties</h4>
+                            <input type="hidden" id="edit-field-id">
                             <div class="form-group">
                                 <label class="form-label">Label <span class="required">*</span></label>
-                                <input class="form-input" id="edit-field-label" placeholder="Field label">
+                                <input class="form-input" id="edit-field-label" placeholder="Field label" oninput="saveFieldEdit()">
                             </div>
                             <div class="form-group" id="edit-field-placeholder-group">
                                 <label class="form-label" id="edit-field-placeholder-label">Placeholder</label>
-                                <input class="form-input" id="edit-field-placeholder" placeholder="Placeholder text">
+                                <input class="form-input" id="edit-field-placeholder" placeholder="Placeholder text" oninput="saveFieldEdit()">
+                            </div>
+                            <div class="form-group" id="edit-field-options-group" style="display:none">
+                                <label class="form-label">Options (one per line)</label>
+                                <textarea class="form-textarea" id="edit-field-options" rows="4" placeholder="Option 1&#10;Option 2&#10;Option 3" oninput="saveFieldEdit()"></textarea>
+                                <span class="form-hint">Enter each option on a new line</span>
+                            </div>
+                            <div class="form-group">
+                                <label class="toggle">
+                                    <input type="checkbox" id="edit-field-required" onchange="saveFieldEdit()">
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">Required field</span>
+                                </label>
                             </div>
                         </div>
-                        <div class="form-group" id="edit-field-options-group" style="display:none">
-                            <label class="form-label">Options (one per line)</label>
-                            <textarea class="form-textarea" id="edit-field-options" rows="4" placeholder="Option 1&#10;Option 2&#10;Option 3"></textarea>
-                            <span class="form-hint">Enter each option on a new line</span>
+                        <div id="field-editor-empty" class="field-editor-empty">
+                            <div style="color:var(--gray-400); font-size:40px; margin-bottom:8px">&#9881;</div>
+                            <div>Select a field on the canvas to edit its properties</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: SETTINGS -->
+            <div id="tab-settings" class="tab-content" style="display: none;">
+                <div class="card" style="max-width: 800px; margin: 0 auto;">
+                    <div class="card-header"><h3>General Settings</h3></div>
+                    <div class="card-body">
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label class="form-label">Form Title <span class="required">*</span></label>
+                                <input class="form-input" id="form-title" placeholder="e.g. Contact Us" value="Untitled Form">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Notification Email</label>
+                                <input class="form-input" id="notification-email" type="email" placeholder="you@example.com">
+                                <span class="form-hint">Receive email when someone submits this form</span>
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label class="toggle">
-                                <input type="checkbox" id="edit-field-required">
-                                <span class="toggle-slider"></span>
-                                <span class="toggle-label">Required field</span>
-                            </label>
+                            <label class="form-label">Description</label>
+                            <textarea class="form-textarea" id="form-description" placeholder="Form description shown to respondents..." rows="3"></textarea>
                         </div>
-                        <div style="display:flex;gap:8px;margin-top:12px">
-                            <button class="btn btn-primary btn-sm" onclick="saveFieldEdit()">Done</button>
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label class="form-label">Submit Button Text</label>
+                                <input class="form-input" id="submit-text" value="Submit">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Redirect URL (after submission)</label>
+                                <input class="form-input" id="redirect-url" placeholder="https://example.com/thank-you">
+                                <span class="form-hint">Leave empty to show a success message</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: PAYMENT -->
+            <div id="tab-payment" class="tab-content" style="display: none;">
+                <div class="card" style="max-width: 800px; margin: 0 auto;">
+                    <div class="card-header">
+                        <h3>Razorpay Integration</h3>
+                        <label class="toggle">
+                            <input type="checkbox" id="razorpay-toggle" onchange="toggleRazorpaySettings()">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">Enable Razorpay</span>
+                        </label>
+                    </div>
+                    <div class="card-body" id="razorpay-settings" style="display:none">
+                        <div class="alert alert-info" style="margin-bottom:0">
+                            <span>&#8505;</span>
+                            <span>Add a <strong>Price</strong> field to your form to let respondents set their payment amount. The field ID should be <code>price</code>.</span>
                         </div>
                     </div>
                 </div>

@@ -1489,6 +1489,110 @@ table .actions {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         scroll-behavior: auto !important;
-        transition-duration: 0.01ms !important;
+    }
+}
+
+/* --- FORM BUILDER REDESIGN --- */
+
+.form-builder-tabs {
+    display: flex;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    border-bottom: 2px solid #f1efe4;
+    padding-bottom: 0;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: -2px;
+}
+
+.tab-btn:hover {
+    color: var(--color-primary);
+    background: rgba(134, 77, 38, 0.05);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.tab-btn.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+}
+
+.builder-layout-3col {
+    display: grid;
+    grid-template-columns: 260px 1fr 320px;
+    gap: var(--space-4);
+    align-items: start;
+    min-height: calc(100vh - 200px);
+}
+
+.builder-sidebar {
+    background: var(--color-bg);
+    border-radius: var(--radius-card);
+    box-shadow: var(--clay-card-shadow);
+    border: 1px solid rgba(134, 77, 38, 0.05);
+    padding: var(--space-3);
+    position: sticky;
+    top: 24px;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+}
+
+.builder-center {
+    background: var(--color-bg);
+    border-radius: var(--radius-card);
+    box-shadow: var(--clay-card-shadow);
+    border: 1px solid rgba(134, 77, 38, 0.05);
+    padding: var(--space-3);
+    min-height: calc(100vh - 200px);
+}
+
+.field-editor-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--color-text-secondary);
+    min-height: 200px;
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1200px) {
+    .builder-layout-3col {
+        grid-template-columns: 220px 1fr 280px;
+        gap: var(--space-2);
+    }
+}
+
+@media (max-width: 900px) {
+    .builder-layout-3col {
+        grid-template-columns: 1fr;
+    }
+    .builder-sidebar {
+        position: static;
+        max-height: none;
     }
 }
