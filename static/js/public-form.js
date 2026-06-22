@@ -61,9 +61,13 @@ function renderFields(fields) {
             `;
         }
 
-        const isFixedPrice = f.id === 'price' && f.placeholder && !isNaN(parseFloat(f.placeholder)) && parseFloat(f.placeholder) > 0;
-        if (isFixedPrice) {
-            return `<input type="hidden" id="field-${f.id}" value="${escapeHtml(f.placeholder)}">`;
+        let isFixedPrice = false;
+        let fixedPriceVal = 0;
+        if (f.id === 'price' && f.placeholder) {
+            fixedPriceVal = parseFloat(f.placeholder.replace(/[^\d.]/g, ''));
+            if (!isNaN(fixedPriceVal) && fixedPriceVal > 0) {
+                isFixedPrice = true;
+            }
         }
 
         const requiredAttr = f.required ? 'required' : '';
@@ -84,10 +88,28 @@ function renderFields(fields) {
                 inputHtml = `<input type="email" ${common} placeholder="${escapeHtml(f.placeholder)}" maxlength="254" oninput="checkPriceField()">`;
                 break;
             case 'number':
-                inputHtml = `<input type="number" ${common} placeholder="${escapeHtml(f.placeholder)}" step="0.01" min="0" max="9999999999" oninput="checkPriceField()">`;
+                if (f.id === 'price') {
+                    if (isFixedPrice) {
+                        inputHtml = `
+                            <div class="fixed-amount-display" style="font-size: 1.1em; font-weight: 500; color: var(--gray-800); padding: 10px 15px; background: var(--color-bg-secondary); border-radius: var(--radius-input); border: 1px solid rgba(134, 77, 38, 0.06); box-shadow: var(--clay-input-shadow);">
+                                ₹ ${fixedPriceVal}
+                            </div>
+                            <input type="hidden" id="${fieldId}" value="${fixedPriceVal}">
+                        `;
+                    } else {
+                        inputHtml = `
+                            <div style="position: relative; display: flex; align-items: center;">
+                                <span style="position: absolute; left: 15px; color: var(--gray-500); font-weight: 500; font-size: 16px; z-index: 1;">₹</span>
+                                <input type="number" ${common} placeholder="${escapeHtml(f.placeholder)}" step="0.01" min="0" max="9999999999" oninput="checkPriceField()" style="padding-left: 32px; width: 100%;">
+                            </div>
+                        `;
+                    }
+                } else {
+                    inputHtml = `<input type="number" ${common} placeholder="${escapeHtml(f.placeholder)}" step="0.01" min="0" max="9999999999" oninput="checkPriceField()">`;
+                }
                 break;
             case 'tel':
-                inputHtml = `<input type="tel" ${common} placeholder="${escapeHtml(f.placeholder)}" maxlength="15" inputmode="numeric" pattern="[0-9+\-() ]{10,15}" title="Enter a valid phone number (10-15 digits with +, -, (, ), spaces)">`;
+                inputHtml = `<input type="tel" ${common} placeholder="${escapeHtml(f.placeholder)}" maxlength="15" inputmode="numeric" pattern="[0-9+\\-() ]{10,15}" title="Enter a valid phone number (10-15 digits with +, -, (, ), spaces)">`;
                 break;
             case 'date':
                 inputHtml = `<input type="date" ${common}>`;
